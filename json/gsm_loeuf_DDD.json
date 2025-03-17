@@ -1,0 +1,29 @@
+{
+    "score_data_path": "/Users/tk508/HAIL/Genetics-Gym/data/GSM/gene_scores_loeuf_neg_fixed.tsv",
+    "is_gsm" : true, 
+     "score_name_dict" : {
+         "LOEUF_v4": "LOEUF_v4_neg", 
+         "LOEUF-scaled": "LOEUF-scaled_neg", 
+         "LOEUF-AM": "LOEUF-AM_neg", 
+         "LOEUF-AM2": "LOEUF-AM2_neg", 
+         "LOEUF-AM3": "LOEUF-AM3_neg", 
+         "LOEUF_AM4": "LOEUF_AM4_neg", 
+         "LOEUF-SFS": "LOEUF-SFS_neg", 
+         "LOEUF-AM-SFS": "LOEUF-AM-SFS_neg", 
+         "LOEUF-ANC": "LOEUF-ANC_neg", 
+         "LOEUF-AM-ANC": "LOEUF-AM-ANC_neg", 
+         "GeneBayes": "GeneBayes", 
+         "DeepLof": "DeepLof"
+         },
+ "score_join_on" : "GENE_ID" ,
+ "score_delim" : null,
+ "score_is_ht" : false,
+ 
+ "eval_data_path" : "/Users/tk508/HAIL/Genetics-Gym/data/GSM/ddd_genes.csv",
+ "eval_join_on" : "gene symbol",
+ "eval_delim" : ",",
+ "eval_is_ht" : false,
+ 
+ "plot_title" : "Loeuf Scores",
+ "eval_name" : "DDD"
+ }

@@ -1,0 +1,28 @@
+{
+   "score_data_path": "/Users/tk508/HAIL/Genetics-Gym/data/GSM/vsm_median_gsm.tsv",
+   "is_gsm" : true, 
+    "score_name_dict" : {
+        "esm": "esm_score_neg_gene_median_percentile",
+        "proteinmpnn": "proteinmpnn_llr_neg_gene_median_percentile",
+        "AM": "am_pathogenicity_gene_median_percentile",
+        "PAI3D": "score_PAI3D_gene_median_percentile",
+        "RASP": "rasp_score_gene_median_percentile",
+        "MisFit_S": "MisFit_S_gene_median_percentile",
+        "MisFit_D": "MisFit_D_gene_median_percentile",
+        "PopEve": "popeve_neg_gene_median_percentile",
+        "EVE": "eve_gene_median_percentile",
+        "ESM1v": "esm1_v_neg_gene_median_percentile",
+        "MPC": "mpc_gene_median_percentile"
+        },
+"score_join_on" : "gene_symbol" ,
+"score_delim" : null,
+"score_is_ht" : false,
+
+"eval_data_path" : "/Users/tk508/HAIL/Genetics-Gym/data/GSM/HI_table.tsv",
+"eval_join_on" : "HI",
+"eval_delim" : null,
+"eval_is_ht" : false,
+
+"plot_title" : "VSM Median Scores",
+"eval_name" : "HI"
+}
