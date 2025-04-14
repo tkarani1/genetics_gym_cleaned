@@ -94,20 +94,19 @@ def results_from_full_table_many_cutoffs(df, is_pos_name, score_column_list, cut
 
 
 
-def calc_plot_pr_scipy(df, score_name_dict, is_pos_col, eval_name=None): 
+def calc_plot_pr_scipy(df, score_name_dict, is_pos_col, path, eval_name=None): 
     plt.figure(figsize=(7, 5))
 
     aps_dict = {}
     aps_scaled = {}
-    random_pr = np.sum(df[is_pos_col]) / len(df)
-    aps_dict['random_pr'] = [random_pr]
-    aps_scaled['random_pr_scaled'] = [1]
-    i = 0
-    for score_name, score_col in score_name_dict.items(): 
+    # random_pr = np.sum(df[is_pos_col]) / len(df)
+    aps_results = np.ones((len(score_name_dict)))
+
+    for i, (score_name, score_col) in enumerate(score_name_dict.items()): 
         precision, recall, thresholds = precision_recall_curve(df[is_pos_col], df[score_col])
         aps = average_precision_score(df[is_pos_col], df[score_col])
         aps_dict[f'{score_name}_pr'] = [aps]
-        aps_scaled[f'{score_name}_pr_scaled'] = [aps/random_pr]
+        aps_results[i] = aps
         plt.plot(recall, precision, label=f'{score_name} ({round(aps, 3)})')
     plt.xlabel("Recall")
     plt.ylabel("Precision")
@@ -116,13 +115,15 @@ def calc_plot_pr_scipy(df, score_name_dict, is_pos_col, eval_name=None):
     else: 
          plt.title(f'PR on {is_pos_col}')
     plt.legend()
-    path = d['results_path']
-   # plt.savefig(f"{path}/pr_{eval_name[0]}_{eval_name[1]}.png")   
-   # plt.show()
-    plt.close()
-    return aps_dict
+    plt.savefig(f"{path}/pr_{eval_name[0]}_{eval_name[1]}.png")   
+    #plt.show()
+    df_results = pd.DataFrame(data=aps_results, index=list(score_name_dict.keys()), columns=['aps']) 
 
-def calc_plot_roc_scipy(df, score_name_dict, is_pos_col, eval_name=None): 
+    plt.close()
+    
+    return df_results
+
+def calc_plot_roc_scipy(df, score_name_dict, is_pos_col, path, eval_name=None): 
     plt.figure(figsize=(7, 5))
 
     roc_dict = {}
@@ -140,16 +141,14 @@ def calc_plot_roc_scipy(df, score_name_dict, is_pos_col, eval_name=None):
     else: 
          plt.title(f'ROC on {is_pos_col}')
     plt.legend()
-    path = d['results_path']
-   # plt.savefig(f"{path}/roc_{eval_name[0]}_{eval_name[1]}.png")   
-   # plt.show()  
+    plt.savefig(f"{path}/roc_{eval_name[0]}_{eval_name[1]}.png")   
+    #plt.show()  
     plt.close()
     df_results = pd.DataFrame(data=roc_results, index=list(score_name_dict.keys()), columns=['roc']) 
-    print(df_results)
 
-    return roc_dict
+    return df_results
 
-def calc_obs_exp(df, score_name_dict, is_pos_col, cutoffs):
+def calc_obs_exp(df, d_info, score_name_dict, is_pos_col, cutoffs):
     df_copy = df.copy()
     df_copy = df_copy[df_copy[is_pos_col]]
     n_scores = len(score_name_dict)
@@ -159,43 +158,42 @@ def calc_obs_exp(df, score_name_dict, is_pos_col, cutoffs):
     for i, c in enumerate(cutoffs):
         for j, (name, col) in enumerate(score_name_dict.items()): 
             df_copy['above_cutoff'] = (df_copy[col] >= np.quantile(df_copy[col], c))
-            obs_sum = df_copy.loc[df_copy["above_cutoff"], "obs_classic"].sum()
-            exp_sum = df_copy.loc[df_copy["above_cutoff"], "exp_classic"].sum()
+            obs_sum = df_copy.loc[df_copy["above_cutoff"], d_info['observed']].sum()
+            exp_sum = df_copy.loc[df_copy["above_cutoff"], d_info['expected']].sum()
             ratio = obs_sum / exp_sum
             results[j, i] = ratio
     df_results = pd.DataFrame(data=results, index=list(score_name_dict.keys()), columns=[f'oe_{c}' for c in cutoffs]) 
     return df_results
 
-def filter_scores(df, col_name, bounds): 
-    lower, upper = bounds
-    if lower is None and upper is None: 
-        return df
-    if lower: 
-        df = df[df[col_name] >=lower]
-    if upper: 
-        df = df[df[col_name] <= upper]
-    print(df)
-    return df
+# def filter_scores(df, col_name, bounds): 
+#     lower, upper = bounds
+#     if lower is None and upper is None: 
+#         return df
+#     if lower: 
+#         df = df[df[col_name] >=lower]
+#     if upper: 
+#         df = df[df[col_name] <= upper]
+#     print(df)
+#     return df
     
 
 
 def main(d): 
+    print('hi from automated')
 
     # Load scores
     if d['score_is_ht']: 
         score_ht = hl.read_table(d['score_data_path'])
-        if not d['is_gsm']: 
+        if not d['score_is_gsm']: 
             score_ht = score_ht.key_by(d['score_join_on'])
             score_ht = score_ht.distinct()
-            d['is_gsm'] = True
+            d['score_is_gsm'] = True
         score_df = score_ht.to_pandas()
     else: 
+        compression = 'gzip' if d['score_data_path'].endswith('bgz') else None   # add in or condition
         score_df = pd.read_csv(d['score_data_path'], delimiter=d['score_delim'])
-        if not d['is_gsm']:
+        if not d['score_is_gsm']:
             score_df = score_df.drop_duplicates(subset=d['score_join_on'], keep='first') 
-    
-    if d['score_filtering']: # this is kind of ugly
-        score_df = filter_scores(score_df, d['score_filtering']['col_name'], (d['score_filtering']['lower_bound'], d['score_filtering']['upper_bound']))
     
     print('score df')
     print(len(score_df))
@@ -206,10 +204,8 @@ def main(d):
         eval_ht = hl.read_table(d['eval_data_path'])
         eval_df = eval_ht.to_pandas()
     else: 
-        if d['eval_data_path'][-3:] == 'bgz': 
-            eval_df = pd.read_csv(d['eval_data_path'], delimiter=d['eval_delim'], compression='gzip')
-        else: 
-            eval_df = pd.read_csv(d['eval_data_path'], delimiter=d['eval_delim'])
+        compression = 'gzip' if d['eval_data_path'].endswith('bgz') else None   # add in or condition
+        eval_df = pd.read_csv(d['eval_data_path'], delimiter=d['eval_delim'], compression=compression)
         eval_df['is_pos'] = True
     print('eval len')
     print(len(eval_df))
@@ -228,14 +224,21 @@ def main(d):
 
     print('orig diff ', len(original_eval_genes - score_eval_df_genes))
 
-    oe_results = calc_obs_exp(score_eval_df, d['score_name_dict'], 'is_pos', [0.9, 0.95])
-
-    
     # GSM on GLE
-    pr_dict = calc_plot_pr_scipy(score_eval_df, d['score_name_dict'], 'is_pos', [d['plot_title'], d['eval_name']])
-    roc_dict = calc_plot_roc_scipy(score_eval_df, d['score_name_dict'], 'is_pos', [d['plot_title'], d['eval_name']])
-    print(pr_dict)
-    print(roc_dict)
+    pr_results = calc_plot_pr_scipy(score_eval_df, d['score_name_dict'], 'is_pos', d['results_path'], [d['plot_title'], d['eval_name']])
+    roc_results = calc_plot_roc_scipy(score_eval_df, d['score_name_dict'], 'is_pos', d['results_path'], [d['plot_title'], d['eval_name']])
+
+    all_results = pd.concat([pr_results, roc_results], axis=1, join='inner')
+    if d['obs/exp']: 
+        oe_results = calc_obs_exp(score_eval_df, d['obs/exp'], d['score_name_dict'], 'is_pos', d['cutoffs'])
+        all_results = pd.concat([all_results, oe_results], axis=1, join='inner')
+    print(all_results)
+    x = d['plot_title']
+    y = d['eval_name']
+    path = d['results_path']
+    all_results_sorted = all_results.sort_values(by='aps', ascending=False)
+    all_results_sorted.to_csv(f'{path}gsm_eval_{x}_{y}.tsv', sep='\t', index=True)
+    return all_results
     # GSM on GLE        # gene-level enrichment (is pos or not)
     # enr_dict = results_from_full_table_many_cutoffs(score_eval_df, 'is_pos', list(d['score_name_dict'].values()), [0.9, 0.95], 0.95, stat='enrichment', ncase=None, ncontrol=None, n_bootstrap_samples=100 )
     # rr_dict = results_from_full_table_many_cutoffs(score_eval_df, 'is_pos', list(d['score_name_dict'].values()), [0.9, 0.95], 0.95, stat='rate_ratio', ncase=None, ncontrol=None, n_bootstrap_samples=100 )
@@ -243,9 +246,9 @@ def main(d):
     # print(rr_dict)
 
     # # Results df
-    scipy_df = pd.DataFrame(pr_dict)
-    scipy_df = scipy_df.assign(**roc_dict)
-    print(scipy_df)
+    # scipy_df = pd.DataFrame(pr_dict)
+    # scipy_df = scipy_df.assign(**roc_dict)
+    # print(scipy_df)
     # x = d['plot_title']
     # y = d['eval_name']
     # path = d['results_path']
@@ -260,7 +263,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--json', type=str)
     args = parser.parse_args()
-    optional_commands = ['results_path', 'score_filtering']
+    optional_commands = ['results_path', 'obs/exp']
 
     for json_file in args.json.split(','):
         print(json_file)
