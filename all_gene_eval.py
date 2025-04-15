@@ -45,11 +45,33 @@ def find_key(gsm_labels, gle_labels):
               return k
     return None
 
+def add_filters(all_d, names, type):
+    names_copy = names.copy()
+    for name in names_copy:
+        info = all_d[name]
+        print(info)
+        if "filter" in info and info["filter"]:
+            for  k, v in info["filter"].items():
+                new_info = info.copy()
+                new_info[f'{type}_filter'] = v
+                all_d[f'{name}_{k}'] = new_info
+                names.append(f'{name}_{k}')
+    return all_d, names
+                     
+        
+
 def main(scores_d, evals_d, GSM_list, GLE_list):
-    for gle in GLE_list: 
+    all_results = pd.DataFrame()
+    
+    scores_d, GSM_list = add_filters(scores_d, GSM_list, 'score')
+    evals_d, GLE_list = add_filters(evals_d, GLE_list, 'eval')
+
+    print('looping')
+    for gle in GLE_list:  
         for gsm in GSM_list: 
             d = {}
             gsm_d, gle_d = scores_d[gsm], evals_d[gle]
+            
             print(d)
             d = gsm_d | gle_d
             join_on = find_key(gsm_d['labels'],gle_d['labels'])
@@ -62,7 +84,15 @@ def main(scores_d, evals_d, GSM_list, GLE_list):
             d['eval_name'] = gle
             d['cutoffs'] = [0.9, 0.95]
 
-            results = gsm_automated_plots.main(d)
+            results, stats = gsm_automated_plots.main(d)
+            rename_dict = {s: f'{gle}_{s}' for s in stats}
+            results = results.rename(columns=rename_dict)
+            all_results = pd.concat([all_results, results], axis=1)
+
+    path = 'results/.'
+    all_results.to_csv(f'{path}multi_gene_eval.tsv', sep='\t', index=True)
+    print(all_results)
+
     print('done')
 
 if __name__ == "__main__":

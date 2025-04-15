@@ -121,7 +121,7 @@ def calc_plot_pr_scipy(df, score_name_dict, is_pos_col, path, eval_name=None):
 
     plt.close()
     
-    return df_results
+    return df_results, ['aps']
 
 def calc_plot_roc_scipy(df, score_name_dict, is_pos_col, path, eval_name=None): 
     plt.figure(figsize=(7, 5))
@@ -144,9 +144,9 @@ def calc_plot_roc_scipy(df, score_name_dict, is_pos_col, path, eval_name=None):
     plt.savefig(f"{path}/roc_{eval_name[0]}_{eval_name[1]}.png")   
     #plt.show()  
     plt.close()
-    df_results = pd.DataFrame(data=roc_results, index=list(score_name_dict.keys()), columns=['roc']) 
+    df_results = pd.DataFrame(data=roc_results, index=list(score_name_dict.keys()), columns=['auc']) 
 
-    return df_results
+    return df_results, ['auc']
 
 def calc_obs_exp(df, d_info, score_name_dict, is_pos_col, cutoffs):
     df_copy = df.copy()
@@ -162,8 +162,9 @@ def calc_obs_exp(df, d_info, score_name_dict, is_pos_col, cutoffs):
             exp_sum = df_copy.loc[df_copy["above_cutoff"], d_info['expected']].sum()
             ratio = obs_sum / exp_sum
             results[j, i] = ratio
-    df_results = pd.DataFrame(data=results, index=list(score_name_dict.keys()), columns=[f'oe_{c}' for c in cutoffs]) 
-    return df_results
+    cols = [f'oe_{c}' for c in cutoffs]
+    df_results = pd.DataFrame(data=results, index=list(score_name_dict.keys()), columns=cols) 
+    return df_results, cols
 
 # def filter_scores(df, col_name, bounds): 
 #     lower, upper = bounds
@@ -180,6 +181,7 @@ def calc_obs_exp(df, d_info, score_name_dict, is_pos_col, cutoffs):
 
 def main(d): 
     print('hi from automated')
+    stat_cols = []
 
     # Load scores
     if d['score_is_ht']: 
@@ -194,7 +196,7 @@ def main(d):
         score_df = pd.read_csv(d['score_data_path'], delimiter=d['score_delim'])
         if not d['score_is_gsm']:
             score_df = score_df.drop_duplicates(subset=d['score_join_on'], keep='first') 
-    
+
     print('score df')
     print(len(score_df))
     print(score_df.isna().sum())
@@ -210,6 +212,10 @@ def main(d):
     print('eval len')
     print(len(eval_df))
 
+    if 'score_filter' in d and d['score_filter']: 
+        score_df = score_df.query(d['score_filter'])
+    if 'eval_filter' in d and d['eval_filter']: 
+        eval_df = eval_df.query(d['eval_filter'])
 
     # Join tables
     score_eval_df = score_df.merge(eval_df, how='left', left_on=d['score_join_on'], right_on=d['eval_join_on'])
@@ -218,27 +224,29 @@ def main(d):
     print(len(score_eval_df))
 
     original_eval_genes = set(eval_df[d['eval_join_on']])
-    print('eval genes: ', len(original_eval_genes))
+    #print('eval genes: ', len(original_eval_genes))
 
     score_eval_df_genes = set(score_eval_df[d['score_join_on']])
 
-    print('orig diff ', len(original_eval_genes - score_eval_df_genes))
+    #print('orig diff ', len(original_eval_genes - score_eval_df_genes))
 
     # GSM on GLE
-    pr_results = calc_plot_pr_scipy(score_eval_df, d['score_name_dict'], 'is_pos', d['results_path'], [d['plot_title'], d['eval_name']])
-    roc_results = calc_plot_roc_scipy(score_eval_df, d['score_name_dict'], 'is_pos', d['results_path'], [d['plot_title'], d['eval_name']])
+    pr_results, c = calc_plot_pr_scipy(score_eval_df, d['score_name_dict'], 'is_pos', d['results_path'], [d['plot_title'], d['eval_name']])
+    stat_cols = stat_cols + c
+    roc_results, c = calc_plot_roc_scipy(score_eval_df, d['score_name_dict'], 'is_pos', d['results_path'], [d['plot_title'], d['eval_name']])
+    stat_cols = stat_cols + c
 
     all_results = pd.concat([pr_results, roc_results], axis=1, join='inner')
     if d['obs/exp']: 
-        oe_results = calc_obs_exp(score_eval_df, d['obs/exp'], d['score_name_dict'], 'is_pos', d['cutoffs'])
+        oe_results, c = calc_obs_exp(score_eval_df, d['obs/exp'], d['score_name_dict'], 'is_pos', d['cutoffs'])
         all_results = pd.concat([all_results, oe_results], axis=1, join='inner')
-    print(all_results)
+        stat_cols = stat_cols + c
     x = d['plot_title']
     y = d['eval_name']
     path = d['results_path']
     all_results_sorted = all_results.sort_values(by='aps', ascending=False)
     all_results_sorted.to_csv(f'{path}gsm_eval_{x}_{y}.tsv', sep='\t', index=True)
-    return all_results
+    return all_results, stat_cols
     # GSM on GLE        # gene-level enrichment (is pos or not)
     # enr_dict = results_from_full_table_many_cutoffs(score_eval_df, 'is_pos', list(d['score_name_dict'].values()), [0.9, 0.95], 0.95, stat='enrichment', ncase=None, ncontrol=None, n_bootstrap_samples=100 )
     # rr_dict = results_from_full_table_many_cutoffs(score_eval_df, 'is_pos', list(d['score_name_dict'].values()), [0.9, 0.95], 0.95, stat='rate_ratio', ncase=None, ncontrol=None, n_bootstrap_samples=100 )
