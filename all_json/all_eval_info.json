@@ -1,0 +1,47 @@
+{
+    "GLE": {
+        "HI": {
+            "eval_data_path" : "/Users/tk508/HAIL/Genetics-Gym/data/GSM/HI_table.tsv",
+            "labels": {
+                "gene_id" : "HI"
+                },
+            "eval_delim" : null,
+            "eval_is_ht" : false
+        },
+        "DD2": {
+            "eval_data_path" : "/Users/tk508/HAIL/Genetics-Gym/data/GSM/dd2.tsv.bgz",
+            "labels": {
+                "gene_id": null, 
+                "enst":  "transcript"
+            }, 
+            "eval_delim": "\t",
+            "eval_is_ht" : false,
+            "obs/exp": {
+                "observed": "obs_classic", 
+                "expected": "exp_classic"
+            }
+        }, 
+        "ndd": {
+            "eval_data_path" : "/Users/tk508/HAIL/Genetics-Gym/data/GSM/ndd.txt",
+            "labels": {
+                "gene_id": "ID"
+            }, 
+            "eval_delim": "\t",
+            "eval_is_ht" : false
+        }, 
+        "HI_Cat": {
+            "eval_data_path" : "/Users/tk508/HAIL/Genetics-Gym/data/GSM/HI_table_with_category.tsv",
+            "labels": {
+                "gene_id" : "Gene"
+                },
+            "eval_delim" : null,
+            "eval_is_ht" : false, 
+            "filter": {
+                "f1": "Category == 'new_HI' and Category == 'severe'", 
+                "f2": "Category == 'new_HI' and Category == 'severe' and Category == 'moderate'"
+            }
+        }
+    }
+}
+
+    
