@@ -45,6 +45,7 @@ def find_key(gsm_labels, gle_labels):
               return k
     return None
 
+# FIX THIS
 def add_filters(all_d, names, type):
     names_copy = names.copy()
     for name in names_copy:
@@ -89,7 +90,7 @@ def main(scores_d, evals_d, GSM_list, GLE_list):
             results = results.rename(columns=rename_dict)
             all_results = pd.concat([all_results, results], axis=1)
 
-    path = 'results/.'
+    path = 'results/'
     all_results.to_csv(f'{path}multi_gene_eval.tsv', sep='\t', index=True)
     print(all_results)
 
@@ -119,14 +120,14 @@ if __name__ == "__main__":
               if s not in scores_d['GSM']: 
                    raise Exception('Score name not in file')  
     else: 
-        GSM_list =  scores_d['GSM']
+        GSM_list =  list(scores_d['GSM'].keys())
     if args.eval_subset: 
          GLE_list = args.eval_subset.split(',')
          for e in GLE_list: 
               if e not in evals_d['GLE']: 
                    raise Exception('Eval name not in file')
     else: 
-         GLE_list = evals_d['GLE']
+         GLE_list = list(evals_d['GLE'].keys())
     print('ready')
 
     main(scores_d['GSM'], evals_d['GLE'], GSM_list, GLE_list)
