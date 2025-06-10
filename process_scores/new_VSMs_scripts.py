@@ -116,7 +116,7 @@ am_table_fixed = am_table.annotate(
     consequence = am_table.f9, 
     genome = am_table.f4
     )
-am_table = am_table.annotate(enst = am_table.enst_orig.split('\.')[0])
+am_table = am_table_fixed.annotate(enst = am_table_fixed.enst_orig.split('\.')[0])
 am_table_fixed = am_table_fixed.drop('f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9')
 am_table_fixed_k = am_table_fixed.key_by('locus', 'alleles')
 am_table_fixed_k.write('gs://genetics-gym-not-public/Trisha/hail_VSM_tables_updated/AM_fixed.ht')
