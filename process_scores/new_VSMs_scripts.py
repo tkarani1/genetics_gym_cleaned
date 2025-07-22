@@ -1,5 +1,5 @@
 import hail as hl
-hl.init()
+hl.init(worker_memory="highmem", driver_memory='highmem') 
 
 # ESM1b
 esm1b_ht = hl.import_table(
@@ -106,6 +106,21 @@ ht = ht.select(ht.rasp_score)
 ht.write('gs://missense-scoring/mutation/rasp_scores.ht')
 
 # AM
+# all isoforms table
+am_table = hl.import_table('gs://dm_alphamissense/AlphaMissense_isoforms_aa_substitutions.tsv.gz', 
+                           delimiter='\t', force_bgz=True, no_header=False, comment='#')
+am_table = am_table.annotate(
+   enst = am_table.transcript_id.split('\.')[0], 
+   aa_pos = hl.int(am_table.protein_variant[1:-1]),
+   aa_ref = am_table.protein_variant[0],
+   aa_alt = am_table.protein_variant[-1],
+   AM = hl.float(am_table.am_pathogenicity), 
+   enst_orig = am_table.transcript_id
+)
+am_table = am_table.select('enst', 'aa_pos', 'aa_ref', 'aa_alt', 'AM', 'enst_orig')
+am_table.write('gs://genetics-gym-not-public/Trisha/hail_VSM_tables_updated/AM_isos.ht')
+
+# # canonical table
 am_table = hl.import_table('gs://dm_alphamissense/AlphaMissense_hg38.tsv.gz', 
                            delimiter='\t', force_bgz=True, no_header=True, comment='#')
 am_table_fixed = am_table.annotate(
@@ -119,4 +134,4 @@ am_table_fixed = am_table.annotate(
 am_table = am_table_fixed.annotate(enst = am_table_fixed.enst_orig.split('\.')[0])
 am_table_fixed = am_table_fixed.drop('f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9')
 am_table_fixed_k = am_table_fixed.key_by('locus', 'alleles')
-am_table_fixed_k.write('gs://genetics-gym-not-public/Trisha/hail_VSM_tables_updated/AM_fixed.ht')
+am_table_fixed_k.write('gs://genetics-gym-not-public/Trisha/hail_VSM_tables_updated/AM.ht')
