@@ -1,0 +1,10 @@
+Joining the VSMs happened in three main stages. 
+
+1. Create VSM and linker
+Extract raw scores + format for each VSM (new_VSMs_scripts.py)
+Create linker (linkers.py)
+
+2. Join each VSM onto the linker (join_VSMs folder) 
+  group by and coalesce such that there is one score per locus, allele, ensg 
+
+3. Join all VSMs together (joining_all_SNP_gene.py)
