@@ -1,11 +1,14 @@
-Joining the VSMs happened in four main stages. 
+Joining the VSMs happened in five main stages. 
 
 1. Extract raw VSM scores (new_VSMs_scripts.py)
 
 2. Create linker (linkers.py)
   Add fixed uniprot ids (join_new_uniprot folder)
 
-2. Join each VSM onto the linker (join_VSMs folder) 
+3. Join each VSM onto the linker (join_VSMs folder) 
   group by and coalesce such that there is one score per locus, allele, ensg 
 
-3. Join all VSMs together (joining_all_SNP_gene.py)
+4. Coalesce each VSM to get the score per SNP-gene combo (coalesce_vsm.py)
+  Also coalesce_vsm_popeve.py for popeve (since it is refseq based) 
+
+5. Join all VSMs together (joining_all_SNP_gene.py)
