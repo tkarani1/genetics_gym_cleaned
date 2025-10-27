@@ -1,8 +1,9 @@
-Joining the VSMs happened in three main stages. 
+Joining the VSMs happened in four main stages. 
 
-1. Create VSM and linker
-Extract raw scores + format for each VSM (new_VSMs_scripts.py)
-Create linker (linkers.py)
+1. Extract raw VSM scores (new_VSMs_scripts.py)
+
+2. Create linker (linkers.py)
+  Add fixed uniprot ids (join_new_uniprot folder)
 
 2. Join each VSM onto the linker (join_VSMs folder) 
   group by and coalesce such that there is one score per locus, allele, ensg 
