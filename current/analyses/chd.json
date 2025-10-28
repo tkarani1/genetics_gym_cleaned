@@ -1,0 +1,14 @@
+{
+    "ht_evaluation_path" : "gs://missense-scoring/chd-with-combined-controls.ht",
+    "is_pos_name" : "is_pos_chd",
+    "filter_table_list" : [],
+    "filter_column_list" : [],
+    "ht_score_path" : "gs://missense-scoring/all_models_scores.ht",
+    "score_column_list" : "RAW_SCORES",
+    "cutoff_list" : [0.99, 0.98, 0.95, 0.9],
+    "pval_cutoff" : 0.95,
+    "hail_contingency" : false,
+    "stat" : "rate_ratio",
+    "ncase" : 2871,
+    "ncontrol" : 7281
+}

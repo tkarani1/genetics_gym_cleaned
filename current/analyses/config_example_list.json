@@ -1,0 +1,7 @@
+{
+    "ht_score_path": "gs://genetics-gym-not-public/Trisha/vsm_all_tables/vsm_all_SNP_gene_cleaned.ht",
+    "score_column_list": ["proteinmpnn_llr_neg", "esm1b_neg", 
+    "score_PAI3D", "revel", "rasp_score", "AM", 
+    "MisFit_D", "MisFit_S", "polyphen_score", "cpt1_score", 
+    "popEVE_neg", "EVE", "ESM_1v_neg", "cadd_score"]
+}

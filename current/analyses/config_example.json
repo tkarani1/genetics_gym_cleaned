@@ -1,0 +1,4 @@
+{
+    "ht_score_path": "gs://your-bucket/path/to/new_scores.ht",
+    "score_column_list": "YOUR_SCORE_COLUMN_NAME"
+}
