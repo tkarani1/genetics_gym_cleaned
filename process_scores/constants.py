@@ -134,6 +134,7 @@ SCORE_KEY_GROUPS = {
     "rasp": "aa_substitution_uniprot",
     "revel": "variant_transcript",
     "cpt": "aa_substitution",
+    # TODO: Need to check this, I was confused by the uniprot_id vs uniprot_isoform fields.
     "proteinmpnn": "aa_substitution_uniprot",
     "pai3d": "variant_transcript",
     "polyphen": "variant_transcript",

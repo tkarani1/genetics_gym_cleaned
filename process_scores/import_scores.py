@@ -549,7 +549,7 @@ def get_scores_config() -> Dict[str, Dict[str, Any]]:
             "parse_func": parse_proteinmpnn,
             "parse_args": {"af2_path": AF2_UNIPROT_ISOFORM_MAPPING_PATH},
             "rename_fields": {"uniprot": UNIPROT_ID_FIELD},
-            "select_fields": [UNIPROT_ID_FIELD, *SCORE_FIELDS["proteinmpnn"]],
+            "select_fields": [UNIPROT_ISOFORM_FIELD, *SCORE_FIELDS["proteinmpnn"]],
             "repartition_partitions": 1000,
         },
         "misfit": {
