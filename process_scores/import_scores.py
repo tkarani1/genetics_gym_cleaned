@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import hail as hl
 
-from process_scores.constants import (
+from genetics_gym_cleaned.process_scores.constants import (
     AA_ALT_FIELD,
     AA_POS_FIELD,
     AA_REF_FIELD,
@@ -21,7 +21,7 @@ from process_scores.constants import (
     UNIPROT_ID_FIELD,
     UNIPROT_ISOFORM_FIELD,
 )
-from process_scores.resources import (
+from genetics_gym_cleaned.process_scores.resources import (
     AF2_UNIPROT_ISOFORM_MAPPING_PATH,
     AM_HG38_PATH,
     AM_ISOFORMS_PATH,
@@ -92,6 +92,11 @@ def import_score(
     if rename_fields is not None:
         ht = ht.rename(rename_fields)
 
+    if repartition_partitions is not None:
+        ht = ht.repartition(repartition_partitions, shuffle=True)
+    elif naive_coalesce_partitions is not None:
+        ht = ht.naive_coalesce(naive_coalesce_partitions)
+
     if key_by_fields is not None:
         # Use new shuffle method to prevent shuffle errors.
         hl._set_flags(use_new_shuffle="1")
@@ -100,11 +105,6 @@ def import_score(
 
     if select_fields is not None:
         ht = ht.select(*select_fields)
-
-    if repartition_partitions is not None:
-        ht = ht.repartition(repartition_partitions, shuffle=True)
-    elif naive_coalesce_partitions is not None:
-        ht = ht.naive_coalesce(naive_coalesce_partitions)
 
     return ht
 

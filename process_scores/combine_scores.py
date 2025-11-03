@@ -3,14 +3,18 @@ import logging
 
 import hail as hl
 
-from process_scores.constants import (
+from genetics_gym_cleaned.process_scores.constants import (
     HIGHER_IS_LESS_DELETERIOUS,
     KEY_GROUPS,
     LINKER_KEY_FIELDS,
     SCORE_KEY_GROUPS,
     UNIPROT_ID_FIELD,
 )
-from process_scores.resources import BASE_HT_PATH, KEYED_HT_PATH, PARTITIONS_HE_PATH
+from genetics_gym_cleaned.process_scores.resources import (
+    BASE_HT_PATH,
+    KEYED_HT_PATH,
+    PARTITIONS_HE_PATH,
+)
 
 logging.basicConfig(
     format="%(asctime)s (%(name)s %(lineno)s): %(message)s",
