@@ -5,6 +5,8 @@
 ########################################################################################
 
 ESM1B_PATH = "gs://missense-scoring/esm1b-650m-brandes/proc/*.txt.bgz"
+# TODO: Move this to a more permanent location.
+ESM1B_UNIPROT_ISOFORM_MAPPING_PATH = "gs://gnomad-julia/genetics_gym/resources/esm1b_uniprot_isoform_mapping.txt"
 MISFIT_PATH = "gs://missense-scoring/misfit/raw/MisFit_by_Uniprot/*.txt.gz"
 MISFIT_MAPPING_PATH = "gs://missense-scoring/misfit/raw/geneset_s_gene.txt"
 POPEVE_PATH = "gs://missense-scoring/popEVE_ukbb_20250312/*.csv"
@@ -30,7 +32,7 @@ AM_ISOFORMS_PATH = (
 AM_HG38_PATH = "gs://dm_alphamissense/AlphaMissense_hg38.tsv.gz"
 
 ########################################################################################
-# Missense score resource paths
+# VSM base HT paths
 ########################################################################################
 
 BASE_HT_PATH = "gs://gnomad-julia/genetics_gym/linkers/vsm_base_em_gene.ht"

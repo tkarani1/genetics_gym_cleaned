@@ -33,6 +33,10 @@ AA_SUBSTITUTION_KEY_FIELDS = [AA_POS_FIELD, AA_REF_FIELD, AA_ALT_FIELD]
 """The amino acid substitution key fields."""
 AA_SUBSTITUTION_UNIPROT_KEY_FIELDS = [*AA_SUBSTITUTION_KEY_FIELDS, UNIPROT_ID_FIELD]
 """The amino acid substitution UniProt key fields."""
+AA_SUBSTITUTION_UNIPROT_ISOFORM_KEY_FIELDS = [
+    *AA_SUBSTITUTION_KEY_FIELDS, UNIPROT_ISOFORM_FIELD
+]
+"""The amino acid substitution UniProt isoform key fields."""
 AA_SUBSTITUTION_TRANSCRIPT_KEY_FIELDS = [
     *AA_SUBSTITUTION_KEY_FIELDS,
     ENSEMBL_TRANSCRIPT_ID_FIELD,
@@ -65,6 +69,7 @@ KEY_GROUPS = {
     "aa_substitution": AA_SUBSTITUTION_KEY_FIELDS,
     "aa_substitution_transcript": AA_SUBSTITUTION_TRANSCRIPT_KEY_FIELDS,
     "aa_substitution_uniprot": AA_SUBSTITUTION_UNIPROT_KEY_FIELDS,
+    "aa_substitution_uniprot_isoform": AA_SUBSTITUTION_UNIPROT_ISOFORM_KEY_FIELDS,
     "aa_substitution_alt_uniprot_transcript": AA_ALT_UNIPROT_TRANSCRIPT_KEY_FIELDS,
 }
 """The table key groups."""
@@ -127,7 +132,7 @@ SCORE_FIELDS = {
 """The score fields in each score resource."""
 
 SCORE_KEY_GROUPS = {
-    "esm1b": "aa_substitution_uniprot",
+    "esm1b": "aa_substitution_uniprot_isoform",
     "misfit": "aa_substitution_alt_uniprot_transcript",
     "popeve": "aa_substitution",
     # "mpc": "variant", # TODO: Uncomment this when MPC scores are processed.

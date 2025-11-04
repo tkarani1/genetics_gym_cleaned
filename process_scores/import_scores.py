@@ -29,6 +29,7 @@ from genetics_gym_cleaned.process_scores.resources import (
     CONTEXT_VEP_ANNOTATED_PATH,
     CPT_PATH,
     ESM1B_PATH,
+    ESM1B_UNIPROT_ISOFORM_MAPPING_PATH,
     GPN_MSA_PATH,
     MISFIT_MAPPING_PATH,
     MISFIT_PATH,
@@ -105,6 +106,47 @@ def import_score(
 
     if select_fields is not None:
         ht = ht.select(*select_fields)
+
+    return ht
+
+
+def parse_esm1b(ht: hl.Table, uniprot_isoform_mapping_path: str) -> hl.Table:
+    """
+    Parse the ESM1b score.
+
+    `ht` input format:
+
+        aa_alt    aa_pos    aa_ref    esm_score    uniprot
+        A         1         M         -7.342       O75030
+        C         1         M         -8.368       O75030
+        D         1         M         -7.976       O75030
+
+    `uniprot_isoform_mapping_path` input format:
+
+        uniprot_id    canonical_uniprot_isoform
+        O75030        O75030-1
+
+    :param ht: The Hail Table to parse.
+    :param uniprot_isoform_mapping_path: The path to the Uniprot isoform mapping table.
+        Note: this table was built from the 2022_01 (February 2022) release of the 
+        Uniprot Knowledgebase. It contains a mapping for only the Uniprot entries that 
+        have isoforms to the canonical isoform ID. This is because the canonical isoform
+        only includes the Uniprot ID without the isoform number.
+    :return: A Hail Table with the ESM1b score.
+    """
+    uniprot_isoform_mapping_ht = hl.import_table(uniprot_isoform_mapping_path)
+    uniprot_isoform_mapping_ht = uniprot_isoform_mapping_ht.key_by(UNIPROT_ID_FIELD)
+
+    uniprot_canonical_isoform_id_expr = uniprot_isoform_mapping_ht[ht.uniprot]
+    ht = ht.annotate(
+        **{
+            UNIPROT_ISOFORM_FIELD: hl.or_else(
+                uniprot_canonical_isoform_id_expr,
+                ht.uniprot,
+            ),
+        },
+        original_uniprot_isoform_id=ht.uniprot,
+    )
 
     return ht
 
@@ -533,10 +575,12 @@ def get_scores_config() -> Dict[str, Dict[str, Any]]:
                 "force": True,
                 "missing": "",
             },
-            "rename_fields": {
-                "uniprot": UNIPROT_ID_FIELD,
-                "esm_score": ESM1B_SCORE_FIELD,
+            "parse_func": parse_esm1b,
+            "parse_args": {
+                "uniprot_isoform_mapping_path": ESM1B_UNIPROT_ISOFORM_MAPPING_PATH
             },
+            "select_fields": ["original_uniprot_isoform_id", *SCORE_FIELDS["esm1b"]],
+            "rename_fields": {"esm_score": ESM1B_SCORE_FIELD},
         },
         "rasp": {
             "path": RASP_PATH,
